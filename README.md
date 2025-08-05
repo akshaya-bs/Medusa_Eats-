@@ -1,6 +1,6 @@
 # Medusa Eats (Enhanced Snake)
 
-A terminal-based Snake game written in Haskell, now simplified: collect only **Extra Food** power-ups and complete **Speed Up** challenges to boost your score. Enjoy smooth differential rendering and non-blocking input handling.
+A terminal-based Snake game written in Haskell, now simplified: collect  **Extra Food** power-ups and complete **Speed Up** challenges to boost your score. Enjoy smooth differential rendering and non-blocking input handling.
 
 ---
 
