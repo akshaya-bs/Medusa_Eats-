@@ -8,13 +8,13 @@ Terminal‐based Haskell Snake clone with power-ups, challenges, and smooth rend
 cabal build
 cabal run enhanced-snake
 ```
-#Controls
+# Controls
 
 W/A/S/D to move
 
 Q to quit
 
-#Features
+# Features
 
 Extra-food power-ups
 
