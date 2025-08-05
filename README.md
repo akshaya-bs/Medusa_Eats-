@@ -9,11 +9,13 @@ cabal build
 cabal run enhanced-snake
 ```
 #Controls
+
 W/A/S/D to move
 
 Q to quit
 
 #Features
+
 Extra-food power-ups
 
 Speed-up challenges
