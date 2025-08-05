@@ -49,8 +49,8 @@ data World = World {
     challenges :: [Challenge],
     invincible :: Int,
     speedBoost :: Int,
-    gamePaused :: Int,  -- Pause counter for messages
-    lastMessage :: String  -- Last power-up/challenge message
+    gamePaused :: Int,  
+    lastMessage :: String  
 } deriving (Show)
 
 data GameState = Playing World | GameOver Int | Paused World String
@@ -95,17 +95,15 @@ randomFreePosition lim g s occupied =
 generatePowerUp :: R.RandomGen g => (Int, Int) -> g -> Snake -> Position -> [Position] -> (PowerUp, g)
 generatePowerUp lim g s foodPos challengePositions =
     let (pos, g1) = randomFreePosition lim g s (foodPos : challengePositions)
-        -- Only one power-up type now
         powerType = ExtraFood
-        duration = 1000  -- Power-ups stay until collected
+        duration = 1000  
     in (PowerUp powerType pos duration, g1)
 
 generateChallenge :: R.RandomGen g => (Int, Int) -> g -> Snake -> Position -> [Position] -> (Challenge, g)
 generateChallenge lim g s foodPos powerUpPositions =
     let (pos, g1) = randomFreePosition lim g s (foodPos : powerUpPositions)
-        -- Only one challenge type
         challengeType = SpeedUp
-        duration = 1000  -- Challenges stay until collected
+        duration = 1000  
     in (Challenge challengeType pos duration, g1)
 
 -- Spawn power-up/challenge every 50 points, randomized
@@ -115,7 +113,7 @@ shouldSpawnItem score = score > 0 && score `mod` 50 == 0
 -- Game Logic
 advance :: World -> Direction -> World
 advance w newDir
-    | gamePaused w > 0 = w { gamePaused = gamePaused w - 1 }  -- Handle pause
+    | gamePaused w > 0 = w { gamePaused = gamePaused w - 1 }  
     | newDir == opposite (direction w) = advanceInCurrentDirection
     | newHead == food w = eatFood
     | newHead `elem` map position (powerUps w) = collectPowerUp
@@ -136,21 +134,17 @@ advance w newDir
         
         eatFood = 
             let newSnake = eat (snake w) actualDir
-                -- Clear existing power-ups and challenges when eating regular food
                 clearedPowerUps = []
                 clearedChallenges = []
-                allOccupiedPositions = []  -- No existing items after clearing
+                allOccupiedPositions = []  
                 (newFood, g1) = randomFreePosition (limits w) (rand w) newSnake allOccupiedPositions
                 newScore = score w + 10
                 shouldSpawn = shouldSpawnItem newScore
                 
-                -- Much better randomization with multiple mixing steps
                 (mix1, g2) = R.randomR (1 :: Int, 10000) g1
                 (mix2, g3) = R.randomR (1 :: Int, 10000) g2  
                 (mix3, g4) = R.randomR (1 :: Int, 10000) g3
-                -- Use the sum of mixes to determine spawn type for better distribution
                 spawnType = (mix1 + mix2 + mix3) `mod` 2
-                -- spawnType 0 = power-up (?), spawnType 1 = challenge (!)
                 
                 (newPowerUps, newChallenges, finalGen) = 
                     if shouldSpawn
@@ -177,7 +171,6 @@ advance w newDir
             let collectedPowerUp = head $ filter (\p -> position p == newHead) (powerUps w)
                 remainingPowerUps = filter (\p -> position p /= newHead) (powerUps w)
                 newSnake = eat (snake w) actualDir
-                -- Power-up gives 10 points
                 (bonusScore, message) = (10, "EXTRA FOOD POWER-UP! Bonus points!")
             in w {
                 snake = newSnake,
@@ -185,7 +178,7 @@ advance w newDir
                 powerUps = remainingPowerUps,
                 score = score w + bonusScore,
                 invincible = max 0 (invincible w - 1),
-                gamePaused = 20,  -- Pause for ~4 seconds (20 * 200ms)
+                gamePaused = 20,  
                 lastMessage = message
             }
             
@@ -193,15 +186,14 @@ advance w newDir
             let collectedChallenge = head $ filter (\c -> challengePosition c == newHead) (challenges w)
                 remainingChallenges = filter (\c -> challengePosition c /= newHead) (challenges w)
                 newSnake = eat (snake w) actualDir
-                -- Challenge gives 15 points
                 (newSpeedBoost, message) = (120, "SPEED CHALLENGE! Moving faster! (120 moves)")
             in w {
                 snake = newSnake,
                 direction = actualDir,
                 challenges = remainingChallenges,
-                score = score w + 15,  -- Challenge bonus
+                score = score w + 15, 
                 speedBoost = newSpeedBoost,
-                gamePaused = 20,  -- Pause for ~4 seconds
+                gamePaused = 20,  
                 lastMessage = message
             }
 
@@ -269,7 +261,7 @@ clearStatusArea w = do
     let (r, c) = limits w
     -- Clear multiple lines to prevent collision
     setCursorPosition (r + 2) 0
-    putStr $ replicate (c + 30) ' '  -- Wider clear
+    putStr $ replicate (c + 30) ' '  
     setCursorPosition (r + 3) 0
     putStr $ replicate (c + 30) ' '
     setCursorPosition (r + 4) 0
@@ -281,10 +273,9 @@ clearStatusArea w = do
 renderWorld :: World -> IO ()
 renderWorld w = renderWorldDiff w Nothing
 
--- Efficient differential rendering
+-- differential rendering
 renderWorldDiff :: World -> Maybe World -> IO ()
 renderWorldDiff newWorld oldWorldMaybe = do
-    -- Clear only old positions that are no longer occupied
     case oldWorldMaybe of
         Just oldWorld -> do
             let oldTail = last (snake oldWorld)
@@ -297,7 +288,6 @@ renderWorldDiff newWorld oldWorldMaybe = do
             when (food oldWorld /= food newWorld && food oldWorld `notElem` newPositions) $
                 draw ' ' (food oldWorld)
             
-            -- Clear old power-ups and challenges that disappeared
             let oldPowerUpPositions = map position (powerUps oldWorld)
                 oldChallengePositions = map challengePosition (challenges oldWorld)
                 newPowerUpPositions = map position (powerUps newWorld)
@@ -311,9 +301,8 @@ renderWorldDiff newWorld oldWorldMaybe = do
     draw '*' (food newWorld)
     mapM_ (draw 'O') (snake newWorld)
     mapM_ (draw '?' . position) (powerUps newWorld)
-    mapM_ (draw '!' . challengePosition) (challenges newWorld)  -- Use ! for challenges
+    mapM_ (draw '!' . challengePosition) (challenges newWorld) 
     
-    -- Update status efficiently
     updateStatus newWorld oldWorldMaybe
 
 -- Efficient status updates
@@ -332,19 +321,18 @@ updateStatus newWorld oldWorldMaybe = do
                         " | Speed: " ++ speedText
         
         setCursorPosition (r + 2) 0
-        putStr $ replicate 60 ' '  -- Clear wider area first
+        putStr $ replicate 60 ' '  
         setCursorPosition (r + 2) 0
         putStr statusText
 
--- Enhanced drawUpdate with better text clearing
+
 drawUpdate :: GameState -> Maybe World -> IO ()
 drawUpdate (Playing w) oldWorld = renderWorldDiff w oldWorld
 drawUpdate (Paused w message) oldWorld = do
     renderWorldDiff w oldWorld
-    -- Clear and display pause message properly
     let (r, _) = limits w
     setCursorPosition (r + 3) 0
-    putStr $ replicate 60 ' '  -- Clear wider area
+    putStr $ replicate 60 ' '  
     setCursorPosition (r + 3) 0
     putStr message
 drawUpdate (GameOver finalScore) _ = do
@@ -361,26 +349,23 @@ drawUpdate (GameOver finalScore) _ = do
         setCursorPosition row 0
         putStr $ replicate 70 ' ') [r+2..r+6]
     
-    -- Show game over with proper spacing
+
     setCursorPosition (r + 3) 0
     putStr $ "GAME OVER! Final Score: " ++ show finalScore
     setCursorPosition (r + 4) 0
     putStr "Press any key to exit..."
 
--- Function to create initial world with much better randomization
+
 createInitialWorld :: IO World
 createInitialWorld = do
     currentTime <- getPOSIXTime
-    -- Much more aggressive seed mixing
     let timeMicro = round (currentTime * 1000000)
         timeNano = round (currentTime * 1000000000) `mod` 999999
-        -- Mix with multiple prime numbers for better distribution
         seed1 = (timeMicro * 31 + timeNano * 37) `mod` 2147483647
         seed2 = (timeMicro * 41 + timeNano * 43) `mod` 2147483647  
         finalSeed = abs (seed1 + seed2 * 47) `mod` 2147483647
         gen = R.mkStdGen finalSeed
         
-        -- Extensive warm-up with 10 random calls
         warmUpGens = take 10 $ iterate (\g -> snd $ R.randomR (1 :: Int, 100000) g) gen
         warmedGen = last warmUpGens
         
@@ -428,10 +413,10 @@ gameLoopWithHistory dirVar quitVar world previousWorld = do
                     putStr "Thanks for playing MEDUSA EATS!"
                     return ()
                 _ -> do
-                    let baseDelay = 200000  -- 200ms base delay
+                    let baseDelay = 200000  
                         actualDelay = if speedBoost newWorld > 0 
-                                     then baseDelay - 80000  -- Faster: 120ms (was 150ms)
-                                     else baseDelay          -- Normal speed: 200ms
+                                     then baseDelay - 80000  
+                                     else baseDelay         
                     threadDelay actualDelay
                     gameLoopWithHistory dirVar quitVar newWorld (Just world)
 
