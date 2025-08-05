@@ -7,7 +7,7 @@ Terminal‐based Haskell Snake clone with power-ups, challenges, and smooth rend
 ```bash
 cabal build
 cabal run enhanced-snake
-
+```
 #Controls
 W/A/S/D to move
 
