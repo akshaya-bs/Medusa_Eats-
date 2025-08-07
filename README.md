@@ -47,7 +47,7 @@ A terminal-based Snake game written in Haskell, collect  **Extra Food** power-up
 2. **Build with Cabal**
 
    ```bash
-   cabal update   # ensure package index is fresh
+   cabal update   
    cabal build
    ```
 
