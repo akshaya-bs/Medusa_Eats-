@@ -87,7 +87,7 @@ Medusa_Eats-/
 
 ## How It Works
 
-1. **World State**: A `World` record tracks the snake, food, power-ups, challenges, score, and timers (`invincible`, `speedBoost`, `gamePaused`, `lastMessage`).
+1. **World State**: A `World` record tracks the snake, food, power-ups, challenges, score, and timers ( `speedBoost`, `gamePaused`, `lastMessage`).
 2. **Advance Function**: `advance :: World -> Direction -> World` handles movement, eating, spawning items, and pause logic.
 3. **Randomness**: A single `StdGen` (`rand`) threads through `randomFreePosition`, `generatePowerUp`, and `generateChallenge`.
 4. **Rendering**: `renderWorldDiff` compares `World` snapshots to clear old cells and draw only new ones.
